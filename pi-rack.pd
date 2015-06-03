@@ -1,0 +1,35 @@
+#N canvas 663 519 450 273 10;
+#N canvas 901 345 832 403 audio_in 1;
+#X obj -1595 -1228 outlet~;
+#X obj -1597 -1316 adc~;
+#X obj -1595 -1271 polygate~ 2 100;
+#X msg -1683 -1346 choice \$1;
+#X obj -1683 -1427 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144
+-1 -1 2;
+#X msg -1358 -1299 start;
+#X msg -1354 -1275 stop;
+#X obj -1516 -1306 readsf~ 2;
+#X floatatom -1681 -1386 5 0 0 0 - - -;
+#X msg -1520 -1403 open samples/guitar_sample_1.wav;
+#X msg -1518 -1380 open samples/guitar_sample_2.wav;
+#X msg -1507 -1360 open samples/bass_sample_1.wav;
+#X msg -1498 -1337 open samples/bass_sample_2.wav;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 2 0;
+#X connect 4 0 8 0;
+#X connect 5 0 7 0;
+#X connect 6 0 7 0;
+#X connect 7 0 2 1;
+#X connect 8 0 3 0;
+#X connect 9 0 7 0;
+#X connect 10 0 7 0;
+#X connect 11 0 7 0;
+#X connect 12 0 7 0;
+#X restore 118 23 pd audio_in;
+#X obj 117 81 dac~;
+#X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
+;
+#X msg 19 46 \; pd dsp \$1;
+#X connect 0 0 1 0;
+#X connect 2 0 3 0;
