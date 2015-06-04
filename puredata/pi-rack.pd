@@ -28,10 +28,10 @@
 #X connect 12 0 7 0;
 #X restore 116 34 pd audio_in;
 #X obj 119 193 dac~;
-#X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1 1
+#X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
 #X msg 19 46 \; pd dsp \$1;
-#N canvas 1676 1004 1680 968 phaser 0;
+#N canvas 1676 1004 1680 968 phaser 1;
 #X obj -1097 -663 inlet~;
 #X obj -1097 -244 outlet~;
 #X obj -645 -502 hsl 128 15 0 10 0 0 empty empty empty -2 -8 0 10 -262144
@@ -98,7 +98,7 @@
 #X connect 22 0 16 0;
 #X connect 22 0 17 0;
 #X restore 195 105 pd phaser;
-#N canvas 405 437 725 502 flanger 1;
+#N canvas 575 397 725 503 flanger 1;
 #X obj -38 -144 inlet~;
 #X obj -38 292 outlet~;
 #X obj -11 136 +~ 10;
@@ -112,11 +112,11 @@
 #X floatatom 213 -17 5 0 0 0 - - -;
 #X floatatom 216 151 5 0 0 0 - - -;
 #X obj 213 -121 hsl 90 20 0 3 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 1700 1;
+-1 -1 0 1;
 #X obj 216 -47 hsl 90 20 0 30 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
 #X obj 219 37 hsl 90 20 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 8900 1;
+-1 -1 0 1;
 #X text 207 -137 Speed;
 #X text 211 -62 Width;
 #X text 213 20 Manual;
@@ -128,8 +128,8 @@
 \; at maximum width \, manual does nothing.;
 #X msg 231 85 bang;
 #X floatatom 219 231 5 0 0 0 - - -;
-#X obj 222 201 hsl 90 20 0 0.9 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+#X obj 222 201 hsl 90 20 -0.9 0.9 0 0 empty empty empty -2 -8 0 10
+-262144 -1 -1 900 1;
 #X text 217 186 Regen;
 #X obj -13 -68 +~;
 #X obj -13 -39 delwrite~ fl_delayed_in 50;
@@ -142,13 +142,13 @@
 #X obj 329 36 r fl_width;
 #X obj 255 150 s fl_manual;
 #X obj 263 231 s fl_regen;
-#X obj 47 -89 r fl_regen;
+#X obj 54 -89 r fl_regen;
 #X obj 19 -126 r~ fl_delayed_out;
-#X obj 20 -88 *~;
 #X obj -11 187 vd~ fl_delayed_in;
+#X obj 20 -88 *~ 0;
 #X connect 0 0 7 0;
 #X connect 0 0 27 0;
-#X connect 2 0 41 0;
+#X connect 2 0 40 0;
 #X connect 3 0 4 0;
 #X connect 4 0 5 0;
 #X connect 5 0 2 0;
@@ -174,11 +174,11 @@
 #X connect 31 0 5 1;
 #X connect 32 0 2 1;
 #X connect 35 0 20 0;
-#X connect 38 0 40 1;
-#X connect 39 0 40 0;
-#X connect 40 0 27 1;
-#X connect 41 0 7 1;
-#X connect 41 0 29 0;
+#X connect 38 0 41 1;
+#X connect 39 0 41 0;
+#X connect 40 0 7 1;
+#X connect 40 0 29 0;
+#X connect 41 0 27 1;
 #X restore 101 106 pd flanger;
 #X connect 0 0 5 0;
 #X connect 2 0 3 0;
