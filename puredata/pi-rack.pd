@@ -1,5 +1,5 @@
-#N canvas 343 397 450 273 10;
-#N canvas 707 383 832 403 audio_in 1;
+#N canvas 359 363 450 273 10;
+#N canvas 707 383 832 403 audio_in 0;
 #X obj -1682 -1297 outlet~;
 #X obj -1635 -1398 adc~;
 #X obj -1681 -1419 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144
@@ -29,11 +29,10 @@
 #X connect 11 0 5 0;
 #X connect 12 0 5 0;
 #X connect 13 0 0 0;
-#X restore 116 34 pd audio_in;
-#X obj 119 193 dac~;
+#X restore 159 56 pd audio_in;
 #X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
-#X msg 19 46 \; pd dsp \$1;
+#X msg 19 35 \; pd dsp \$1;
 #N canvas 1676 1004 1680 968 phaser 0;
 #X obj -1097 -663 inlet~;
 #X obj -1097 -244 outlet~;
@@ -100,7 +99,7 @@
 #X connect 19 0 27 0;
 #X connect 22 0 16 0;
 #X connect 22 0 17 0;
-#X restore 195 105 pd phaser;
+#X restore 241 150 pd phaser;
 #N canvas 575 397 725 504 flanger 0;
 #X obj -38 -144 inlet~;
 #X obj -38 292 outlet~;
@@ -182,10 +181,21 @@
 #X connect 39 0 41 0;
 #X connect 40 0 2 0;
 #X connect 41 0 37 0;
-#X restore 101 106 pd flanger;
-#X connect 0 0 5 0;
-#X connect 2 0 3 0;
-#X connect 4 0 1 0;
-#X connect 4 0 1 1;
-#X connect 5 0 1 1;
-#X connect 5 0 1 0;
+#X restore 173 149 pd flanger;
+#N canvas 757 421 450 300 audio_out 0;
+#X obj 86 98 dac~;
+#X obj 94 54 inlet~;
+#X connect 1 0 0 0;
+#X connect 1 0 0 1;
+#X restore 213 225 pd audio_out;
+#X obj 102 114 demultiplex~ . . .;
+#X obj 238 88 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144 -1
+-1 0;
+#X connect 0 0 6 0;
+#X connect 1 0 2 0;
+#X connect 3 0 5 0;
+#X connect 4 0 5 0;
+#X connect 6 0 5 0;
+#X connect 6 1 4 0;
+#X connect 6 2 3 0;
+#X connect 7 0 6 0;
