@@ -1,11 +1,11 @@
 #N canvas 343 397 450 273 10;
-#N canvas 536 241 832 403 audio_in 1;
+#N canvas 736 164 832 403 audio_in 0;
 #X obj -1595 -1228 outlet~;
 #X obj -1597 -1316 adc~;
 #X obj -1595 -1271 polygate~ 2 100;
 #X msg -1683 -1346 choice \$1;
 #X obj -1683 -1427 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144
--1 -1 2;
+-1 -1 0;
 #X msg -1368 -1243 start;
 #X msg -1367 -1219 stop;
 #X obj -1471 -1252 readsf~ 2;
@@ -38,7 +38,7 @@
 #X connect 17 0 14 0;
 #X restore 116 34 pd audio_in;
 #X obj 119 193 dac~;
-#X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1 1
+#X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
 #X msg 19 46 \; pd dsp \$1;
 #N canvas 1676 1004 1680 968 phaser 0;
@@ -108,25 +108,22 @@
 #X connect 22 0 16 0;
 #X connect 22 0 17 0;
 #X restore 195 105 pd phaser;
-#N canvas 575 397 725 503 flanger 1;
+#N canvas 575 397 725 504 flanger 1;
 #X obj -38 -144 inlet~;
 #X obj -38 292 outlet~;
-#X obj -11 136 +~ 10;
 #X obj -10 32 +~ 1;
 #X obj -10 60 /~ 2;
-#X obj -11 89 *~ 7;
-#X obj -10 4 osc~ 0.5;
 #X obj -38 236 +~;
 #X obj -38 264 /~ 2;
 #X floatatom 211 -97 5 0 0 0 - - -;
 #X floatatom 213 -17 5 0 0 0 - - -;
 #X floatatom 216 151 5 0 0 0 - - -;
-#X obj 213 -121 hsl 90 20 0 3 0 0 empty empty empty -2 -8 0 10 -262144
+#X obj 213 -121 hsl 90 20 0 3 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 1500 1;
+#X obj 216 -47 hsl 90 20 0 30 0 1 empty empty empty -2 -8 0 10 -262144
 -1 -1 2100 1;
-#X obj 216 -47 hsl 90 20 0 30 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 2600 1;
-#X obj 219 37 hsl 90 20 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 4200 1;
+#X obj 219 37 hsl 90 20 0 1 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 3900 1;
 #X text 207 -137 Speed;
 #X text 211 -62 Width;
 #X text 213 20 Manual;
@@ -138,8 +135,8 @@
 \; at maximum width \, manual does nothing.;
 #X msg 231 85 bang;
 #X floatatom 219 231 5 0 0 0 - - -;
-#X obj 222 201 hsl 90 20 -0.9 0.9 0 0 empty empty empty -2 -8 0 10
--262144 -1 -1 6200 1;
+#X obj 222 201 hsl 90 20 -0.9 0.9 0 1 empty empty empty -2 -8 0 10
+-262144 -1 -1 4600 1;
 #X text 217 186 Regen;
 #X obj -13 -68 +~;
 #X obj -13 -39 delwrite~ fl_delayed_in 50;
@@ -155,40 +152,43 @@
 #X obj 54 -89 r fl_regen;
 #X obj 19 -126 r~ fl_delayed_out;
 #X obj -11 187 vd~ fl_delayed_in;
-#X obj 20 -88 *~ 0;
-#X connect 0 0 7 0;
-#X connect 0 0 27 0;
-#X connect 2 0 40 0;
-#X connect 3 0 4 0;
+#X obj 20 -88 *~;
+#X obj -11 89 *~;
+#X obj -10 4 osc~;
+#X obj -11 136 +~;
+#X connect 0 0 4 0;
+#X connect 0 0 24 0;
+#X connect 2 0 3 0;
+#X connect 3 0 39 0;
 #X connect 4 0 5 0;
-#X connect 5 0 2 0;
-#X connect 6 0 3 0;
-#X connect 7 0 8 0;
-#X connect 8 0 1 0;
-#X connect 12 0 9 0;
-#X connect 12 0 33 0;
-#X connect 13 0 10 0;
-#X connect 13 0 34 0;
-#X connect 14 0 21 0;
-#X connect 18 0 21 1;
-#X connect 18 0 23 0;
-#X connect 19 0 18 0;
-#X connect 20 0 19 0;
-#X connect 21 0 11 0;
-#X connect 21 0 36 0;
-#X connect 23 0 21 0;
-#X connect 25 0 24 0;
-#X connect 25 0 37 0;
-#X connect 27 0 28 0;
-#X connect 30 0 6 1;
-#X connect 31 0 5 1;
-#X connect 32 0 2 1;
-#X connect 35 0 20 0;
-#X connect 38 0 41 1;
+#X connect 5 0 1 0;
+#X connect 9 0 6 0;
+#X connect 9 0 30 0;
+#X connect 10 0 7 0;
+#X connect 10 0 31 0;
+#X connect 11 0 18 0;
+#X connect 15 0 18 1;
+#X connect 15 0 20 0;
+#X connect 16 0 15 0;
+#X connect 17 0 16 0;
+#X connect 18 0 8 0;
+#X connect 18 0 33 0;
+#X connect 20 0 18 0;
+#X connect 22 0 21 0;
+#X connect 22 0 34 0;
+#X connect 24 0 25 0;
+#X connect 27 0 40 1;
+#X connect 28 0 39 1;
+#X connect 29 0 41 1;
+#X connect 32 0 17 0;
+#X connect 35 0 38 1;
+#X connect 36 0 38 0;
+#X connect 37 0 4 1;
+#X connect 37 0 26 0;
+#X connect 38 0 24 1;
 #X connect 39 0 41 0;
-#X connect 40 0 7 1;
-#X connect 40 0 29 0;
-#X connect 41 0 27 1;
+#X connect 40 0 2 0;
+#X connect 41 0 37 0;
 #X restore 101 106 pd flanger;
 #X connect 0 0 5 0;
 #X connect 2 0 3 0;
