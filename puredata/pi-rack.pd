@@ -1,9 +1,9 @@
-#N canvas 679 227 450 273 10;
-#N canvas 707 383 832 403 audio_in 0;
+#N canvas 679 227 670 311 10;
+#N canvas 707 383 428 198 audio_in 0;
 #X obj -1682 -1297 outlet~;
 #X obj -1635 -1398 adc~;
 #X obj -1681 -1419 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144
--1 -1 0;
+-1 -1 2;
 #X msg -1588 -1443 start;
 #X msg -1582 -1423 stop;
 #X obj -1588 -1400 readsf~ 2;
@@ -29,7 +29,7 @@
 #X connect 11 0 5 0;
 #X connect 12 0 5 0;
 #X connect 13 0 0 0;
-#X restore 159 56 pd audio_in;
+#X restore 101 71 pd audio_in;
 #X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
 #X msg 19 35 \; pd dsp \$1;
@@ -114,15 +114,15 @@
 #X connect 39 0 2 0;
 #X connect 40 0 41 0;
 #X connect 41 0 37 0;
-#X restore 173 149 pd flanger;
+#X restore 121 154 pd flanger;
 #N canvas 757 421 450 300 audio_out 0;
 #X obj 86 98 dac~;
 #X obj 94 54 inlet~;
 #X connect 1 0 0 0;
 #X connect 1 0 0 1;
-#X restore 213 225 pd audio_out;
-#X obj 238 88 hradio 15 1 0 4 empty empty empty 0 -8 0 10 -262144 -1
--1 0;
+#X restore 101 221 pd audio_out;
+#X obj 238 88 hradio 15 1 0 5 empty empty empty 0 -8 0 10 -262144 -1
+-1 4;
 #N canvas 205 92 563 287 tremolo 0;
 #X obj -1 -2 inlet~;
 #X obj 1 193 outlet~;
@@ -135,11 +135,11 @@
 #X floatatom 397 94 5 0 0 0 - - -;
 #X floatatom 400 178 5 0 0 0 - - -;
 #X obj 397 -10 hsl 90 20 0.5 25 0 1 empty empty empty -2 -8 0 10 -262144
--1 -1 3500 1;
+-1 -1 400 1;
 #X obj 400 64 hsl 90 20 1 20 1 1 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
 #X obj 403 148 hsl 90 20 0 0.5 0 1 empty empty empty -2 -8 0 10 -262144
--1 -1 3700 1;
+-1 -1 6000 1;
 #X obj 53 33 *~ 1;
 #X text 391 -26 Rate;
 #X obj 438 13 s tr_rate;
@@ -176,7 +176,7 @@
 #X connect 22 0 5 0;
 #X connect 23 0 4 0;
 #X connect 29 0 13 0;
-#X restore 245 149 pd tremolo;
+#X restore 197 155 pd tremolo;
 #N canvas 159 248 585 305 wahwah 0;
 #X obj 15 -206 inlet~;
 #X obj 15 -40 outlet~;
@@ -193,14 +193,14 @@
 #X floatatom 306 -97 5 0 0 0 - - -;
 #X floatatom 305 -25 5 0 0 0 - - -;
 #X obj 306 -201 hsl 90 20 0.5 4 0 1 empty empty empty -2 -8 0 10 -262144
--1 -1 4000 1;
+-1 -1 5300 1;
 #X obj 309 -127 hsl 90 20 0 700 0 1 empty empty empty -2 -8 0 10 -262144
 -1 -1 2600 1;
 #X obj 308 -55 hsl 90 20 0 20 0 1 empty empty empty -2 -8 0 10 -262144
--1 -1 2400 1;
+-1 -1 600 1;
 #X floatatom 435 -100 5 0 0 0 - - -;
 #X obj 438 -130 hsl 90 20 700 6000 0 1 empty empty empty -2 -8 0 10
--262144 -1 -1 1400 1;
+-262144 -1 -1 8900 1;
 #X text 304 -142 Min Freq.;
 #X text 433 -145 Max Freq.;
 #X obj 350 -97 s wah_min_f;
@@ -236,15 +236,52 @@
 #X connect 29 0 6 1;
 #X connect 29 0 8 1;
 #X connect 30 0 6 0;
-#X restore 317 148 pd wahwah;
-#X obj 102 114 demultiplex~ . . . .;
-#X connect 0 0 8 0;
+#X restore 276 156 pd wahwah;
+#N canvas 876 406 366 234 vibrato 0;
+#X obj 9 -49 inlet~;
+#X obj 10 139 outlet~;
+#X obj 10 -11 delwrite~ vib_delayed_in 50;
+#X obj 11 110 vd~ vib_delayed_in;
+#X obj 11 21 osc~ 2;
+#X obj 12 49 *~ 1;
+#X obj 12 76 +~ 2;
+#X floatatom 223 30 5 0 0 0 - - -;
+#X floatatom 225 110 5 0 0 0 - - -;
+#X obj 225 6 hsl 90 20 1 3 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 4500 1;
+#X obj 228 80 hsl 90 20 1 5 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 0 1;
+#X text 219 -10 Speed;
+#X obj 58 20 r vib_speed;
+#X obj 267 29 s vib_speed;
+#X obj 269 110 s vib_depth;
+#X text 223 65 Depth;
+#X obj 62 50 r vib_depth;
+#X obj 60 75 * 2;
+#X connect 0 0 2 0;
+#X connect 3 0 1 0;
+#X connect 4 0 5 0;
+#X connect 5 0 6 0;
+#X connect 6 0 3 0;
+#X connect 9 0 7 0;
+#X connect 9 0 13 0;
+#X connect 10 0 8 0;
+#X connect 10 0 14 0;
+#X connect 12 0 4 0;
+#X connect 16 0 5 1;
+#X connect 16 0 17 0;
+#X connect 17 0 6 1;
+#X restore 356 156 pd vibrato;
+#X obj 102 114 demultiplex~ . . . . .;
+#X connect 0 0 9 0;
 #X connect 1 0 2 0;
 #X connect 3 0 4 0;
-#X connect 5 0 8 0;
+#X connect 5 0 9 0;
 #X connect 6 0 4 0;
 #X connect 7 0 4 0;
 #X connect 8 0 4 0;
-#X connect 8 1 3 0;
-#X connect 8 2 6 0;
-#X connect 8 3 7 0;
+#X connect 9 0 4 0;
+#X connect 9 1 3 0;
+#X connect 9 2 6 0;
+#X connect 9 3 7 0;
+#X connect 9 4 8 0;
