@@ -1,5 +1,5 @@
-#N canvas 953 283 670 311 10;
-#N canvas 1022 434 428 198 audio_in 1;
+#N canvas 559 80 656 283 10;
+#N canvas 729 603 428 198 audio_in 0;
 #X obj -1682 -1297 outlet~;
 #X obj -1635 -1398 adc~;
 #X obj -1681 -1419 hradio 15 1 0 3 empty empty empty 0 -8 0 10 -262144
@@ -33,7 +33,7 @@
 #X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1 1
 ;
 #X msg 19 35 \; pd dsp \$1;
-#N canvas 619 184 725 504 flanger 0;
+#N canvas 430 210 725 504 flanger 0;
 #X obj -38 -144 inlet~;
 #X obj -38 292 outlet~;
 #X obj -10 32 +~ 1;
@@ -121,8 +121,8 @@
 #X connect 1 0 0 0;
 #X connect 1 0 0 1;
 #X restore 101 221 pd audio_out;
-#X obj 238 88 hradio 15 1 0 6 empty empty empty 0 -8 0 10 -262144 -1
--1 5;
+#X obj 238 88 hradio 15 1 0 8 empty empty empty 0 -8 0 10 -262144 -1
+-1 3;
 #N canvas 205 92 563 287 tremolo 0;
 #X obj -1 -2 inlet~;
 #X obj 1 193 outlet~;
@@ -197,7 +197,7 @@
 #X obj 309 -127 hsl 90 20 0 700 0 1 empty empty empty -2 -8 0 10 -262144
 -1 -1 2600 1;
 #X obj 308 -55 hsl 90 20 0 20 0 1 empty empty empty -2 -8 0 10 -262144
--1 -1 600 1;
+-1 -1 4800 1;
 #X floatatom 435 -100 5 0 0 0 - - -;
 #X obj 438 -130 hsl 90 20 700 6000 0 1 empty empty empty -2 -8 0 10
 -262144 -1 -1 8900 1;
@@ -237,7 +237,7 @@
 #X connect 29 0 8 1;
 #X connect 30 0 6 0;
 #X restore 276 156 pd wahwah;
-#N canvas 876 406 366 234 vibrato 0;
+#N canvas 453 349 366 210 vibrato 0;
 #X obj 9 -49 inlet~;
 #X obj 10 139 outlet~;
 #X obj 10 -11 delwrite~ vib_delayed_in 50;
@@ -272,7 +272,7 @@
 #X connect 16 0 17 0;
 #X connect 17 0 6 1;
 #X restore 356 156 pd vibrato;
-#N canvas 227 181 532 321 step_vibrato 1;
+#N canvas 227 181 532 321 step_vibrato 0;
 #X obj 9 -418 inlet~;
 #X obj 14 -215 *~;
 #X obj 13 -355 pow 2;
@@ -327,18 +327,51 @@
 #X connect 26 0 7 0;
 #X connect 26 0 17 0;
 #X restore 433 156 pd step_vibrato;
-#X obj 102 114 demultiplex~ . . . . . .;
-#X connect 0 0 10 0;
+#N canvas 1170 183 344 263 fuzz_ring 0;
+#X obj 24 63 *~;
+#X obj 25 24 inlet~;
+#X obj 22 209 outlet~;
+#X obj 58 62 osc~;
+#X obj 22 154 clip~ -1 1;
+#X floatatom 173 95 5 0 0 0 - - -;
+#X floatatom 175 175 5 0 0 0 - - -;
+#X obj 175 71 hsl 90 20 200 4000 1 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 4100 1;
+#X obj 178 145 hsl 90 20 1 40 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 1300 1;
+#X obj 23 124 *~ 10;
+#X text 173 130 Fuzz;
+#X text 169 55 Pitch;
+#X obj 216 94 s fr_pitch;
+#X obj 219 175 s fr_fuzz;
+#X obj 91 61 r fr_pitch;
+#X obj 68 125 r fr_fuzz;
+#X connect 0 0 9 0;
+#X connect 1 0 0 0;
+#X connect 3 0 0 1;
+#X connect 4 0 2 0;
+#X connect 7 0 5 0;
+#X connect 7 0 12 0;
+#X connect 8 0 6 0;
+#X connect 8 0 13 0;
+#X connect 9 0 4 0;
+#X connect 14 0 3 0;
+#X connect 15 0 9 1;
+#X restore 536 155 pd fuzz_ring;
+#X obj 102 114 demultiplex~ . . . . . . . .;
+#X connect 0 0 11 0;
 #X connect 1 0 2 0;
 #X connect 3 0 4 0;
-#X connect 5 0 10 0;
+#X connect 5 0 11 0;
 #X connect 6 0 4 0;
 #X connect 7 0 4 0;
 #X connect 8 0 4 0;
 #X connect 9 0 4 0;
 #X connect 10 0 4 0;
-#X connect 10 1 3 0;
-#X connect 10 2 6 0;
-#X connect 10 3 7 0;
-#X connect 10 4 8 0;
-#X connect 10 5 9 0;
+#X connect 11 0 4 0;
+#X connect 11 1 3 0;
+#X connect 11 2 6 0;
+#X connect 11 3 7 0;
+#X connect 11 4 8 0;
+#X connect 11 5 9 0;
+#X connect 11 7 10 0;
