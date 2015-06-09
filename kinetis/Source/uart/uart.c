@@ -1,4 +1,5 @@
 #include "uart.h"
+#include <string.h>
 
 void uartInit(void)
 {
@@ -21,4 +22,18 @@ void uartSend8(u8 data)
    LOG_UART->D = data;
    
    return;
+}
+
+void uartSendArray(char *arr, int size)
+{
+	int i;
+	for (i = 0; i < size; ++i)
+	{
+		uartSend8(arr[i]);
+	}
+}
+
+void uartSendString(char *str)
+{
+	uartSendArray(str, strlen(str));
 }

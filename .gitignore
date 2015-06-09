@@ -33,3 +33,4 @@
 
 # Kinetis binaries
 FLASH/
+*.launch

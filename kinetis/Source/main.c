@@ -1,17 +1,21 @@
 #include "sspi/sspi.h"
 #include "uart/uart.h"
+#include <stdio.h>
 
 void hardwareInit(void);
 
 int main (void)
 {
 	hardwareInit();
-	
+		
 	if ((SIM->SRSID & SIM_SRSID_WDOG_MASK) != 0) // Halt execution on watchdog reset
 	{
 		while(1)
 			;
 	}
+	
+	uartInit();
+	uartSendString("Hello World!\n\r");
 	
 	while (1)
 		;
@@ -36,7 +40,7 @@ void hardwareInit(void)
     // Enable the RESET and SWD pins
     SIM->SOPT = SIM_SOPT_RSTPE_MASK | SIM_SOPT_SWDE_MASK;
     
-    SIM->BUSDIV = 0x01; // Divide by 2 (for a 40MHz clock)
+    SIM->BUSDIV = 0x00; // Don't divide the bus clock (both are 20MHz)
 	
 	// Enable OSC
 	OSC->CR = OSC_CR_RANGE_MASK | OSC_CR_OSCOS_MASK | OSC_CR_OSCEN_MASK;
@@ -45,8 +49,8 @@ void hardwareInit(void)
 	while(!(OSC->CR & OSC_CR_OSCINIT_MASK))
 		;
 		
-	// Set the divider for a 40MHz input
-	ICS->C1 = (ICS->C1 & ~(ICS_C1_RDIV_MASK)) | ICS_C1_RDIV(4);
+	// Set the divider for a 10MHz input
+	ICS->C1 = (ICS->C1 & ~(ICS_C1_RDIV_MASK)) | ICS_C1_RDIV(3);
 
 	// Change the FLL reference clock to external clock
 	ICS->C1 =  ICS->C1 & ~ICS_C1_IREFS_MASK;
@@ -58,7 +62,7 @@ void hardwareInit(void)
 	while(!(ICS->S & ICS_S_LOCK_MASK))
 		;
 	
-	ICS->C2 = (ICS->C2 & ~(ICS_C2_BDIV_MASK)) | ICS_C2_BDIV(0); // BDIV is 0 for a 40MHz clock
+	ICS->C2 = (ICS->C2 & ~(ICS_C2_BDIV_MASK)) | ICS_C2_BDIV(1); // BDIV is 1 for a 20MHz clock
 	
 	// Clear the loss of lock bit
 	ICS->S |= ICS_S_LOLS_MASK;	

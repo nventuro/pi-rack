@@ -8,5 +8,7 @@
 
 void uartInit(void);
 void uartSend8(u8 data);
+void uartSendArray(char *arr, int size);
+void uartSendString(char *str);
 
 #endif /* UART_H_ */
