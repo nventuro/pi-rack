@@ -38,7 +38,7 @@
 #ifndef __ISR_H
 #define __ISR_H
 
-#include "rti/rti.h"
+#include "periph/rti/rti.h"
 #include "lcd/lcd.h"
 
 #if RTI_PIT_CH == 0

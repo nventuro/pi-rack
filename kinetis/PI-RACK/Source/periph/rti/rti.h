@@ -2,6 +2,7 @@
 #define _RTI_H
 
 #include "utils.h"
+#include <stdlib.h>
 
 #define RTI_FREQ (1000) // Hz. 
 // In order to change this value, RTI_PRESCALER in rti.c must be changed and the file recompiled.

@@ -1,14 +1,10 @@
-#include "sadc/sadc.h"
-#include "uart/uart.h"
-#include "rti/rti.h"
+#include "periph/uart/uart.h"
 #include "lcd/lcd.h"
-#include "pinmap.h"
-#include "utils.h"
-#include <stdlib.h>
+#include "sliders/sliders.h"
+#include "MKE02Z2.h"
 
 void hardwareInit(void);
-
-void print(void *data, int period, int id);
+void gpioPinAssignements(void);
 
 int main (void)
 {
@@ -21,24 +17,15 @@ int main (void)
 	}
 	
 	uartInit();
-	
-	rti_Init();
-	rti_Register(print, NULL, RTI_MS_TO_TICKS(1000), RTI_NOW);
-	
 	uartSendString("AudioSystems - IO module online.\n\r");
 
-
 	lcd_Init(LCD_2004);
-	lcd_Print("Hola este es un super mensaje!");
+	lcd_Print("AudioSytems online");
+	
+	sliders_Init();
 	
 	while (1)
-	{
-	}
-}
-
-void print(void *data, int period, int id)
-{
-	uartSendString("Periodic!\n\r");
+		;
 }
 
 void hardwareInit(void)
@@ -88,4 +75,16 @@ void hardwareInit(void)
 	ICS->S |= ICS_S_LOLS_MASK;	
 	
 	return;
+}
+	
+void gpioPinAssignements(void)
+{
+	//PIN_MAKE_INPUT(PEDAL);
+	//PIN_MAKE_INPUT(BUTTON_LEFT);
+	//PIN_MAKE_INPUT(BUTTON_RIGHT);
+	
+	//PIN_MAKE_OUTPUT(POWER_LED);
+	//PIN_MAKE_OUTPUT(STATUS_LED);
+	
+	//PORT->PUEL |= PORT_PUEL_PTCPE5_MASK; // Enable pullup for PTC5
 }

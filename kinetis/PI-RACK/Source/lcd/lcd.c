@@ -1,6 +1,5 @@
 #include "lcd.h"
 #include "MKE02Z2.h"
-#include "uart/uart.h"
 
 #define LCD_RS_SET_INSTR() PIN_OFF(LCD_RS, LCD_RS_GPIO_PORT)
 #define LCD_RS_SET_DATA() PIN_ON(LCD_RS, LCD_RS_GPIO_PORT)
@@ -292,8 +291,6 @@ void lcd_PrintCallback(void)
 			lcd_data.index = 0;
 		}
 	}
-	
-	uartSend8('p');
 }
 
 void lcd_EnableStrobe(void)

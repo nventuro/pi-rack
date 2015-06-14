@@ -1,6 +1,5 @@
 #include "MKE02Z2.h"
 #include "rti.h"
-#include <stdlib.h>
 
 #define RTI_SETPRESCALER(presc) (RTICTL = presc)
 #define RTI_ENABLE_INTERRUPTS() (CRGINT_RTIE = 1)
