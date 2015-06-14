@@ -132,7 +132,7 @@
 #X connect 4 0 6 0;
 #X connect 7 0 2 1;
 #X restore 101 221 pd audio_out;
-#X obj 238 88 hradio 15 1 0 8 empty empty empty 0 -8 0 10 -262144 -1
+#X obj 238 88 hradio 15 1 0 7 empty empty empty 0 -8 0 10 -262144 -1
 -1 0;
 #N canvas 205 92 563 287 tremolo 0;
 #X obj -1 -2 inlet~;
@@ -369,7 +369,7 @@
 #X connect 14 0 3 0;
 #X connect 15 0 9 1;
 #X restore 536 155 pd fuzz_ring;
-#X obj 102 114 demultiplex~ . . . . . . . .;
+#X obj 102 114 demultiplex~ . . . . . . .;
 #X connect 0 0 11 0;
 #X connect 1 0 2 0;
 #X connect 3 0 4 0;
@@ -385,4 +385,4 @@
 #X connect 11 3 7 0;
 #X connect 11 4 8 0;
 #X connect 11 5 9 0;
-#X connect 11 7 10 0;
+#X connect 11 6 10 0;
