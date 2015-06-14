@@ -38,6 +38,24 @@
 #ifndef __ISR_H
 #define __ISR_H
 
+#include "rti/rti.h"
+#include "lcd/lcd.h"
+
+#if RTI_PIT_CH == 0
+	#undef	VECTOR_038	// Vector 38 is PIT0
+	#define	VECTOR_038 rti_ISR
+#else
+	#undef	VECTOR_039	// Vector 39 is PIT1
+	#define	VECTOR_039 rti_ISR
+#endif
+
+#if LCD_PIT_CH == 0
+	#undef	VECTOR_038	// Vector 38 is PIT0
+	#define	VECTOR_038 lcd_ISR
+#else
+	#undef	VECTOR_039	// Vector 39 is PIT1
+	#define	VECTOR_039 lcd_ISR
+#endif
 
 #endif  //__ISR_H
 

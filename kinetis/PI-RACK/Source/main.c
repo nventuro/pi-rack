@@ -1,8 +1,14 @@
-#include "sspi/sspi.h"
+#include "sadc/sadc.h"
 #include "uart/uart.h"
-#include <stdio.h>
+#include "rti/rti.h"
+#include "lcd/lcd.h"
+#include "pinmap.h"
+#include "utils.h"
+#include <stdlib.h>
 
 void hardwareInit(void);
+
+void print(void *data, int period, int id);
 
 int main (void)
 {
@@ -15,10 +21,24 @@ int main (void)
 	}
 	
 	uartInit();
-	uartSendString("Hello World!\n\r");
+	
+	rti_Init();
+	rti_Register(print, NULL, RTI_MS_TO_TICKS(1000), RTI_NOW);
+	
+	uartSendString("AudioSystems - IO module online.\n\r");
+
+
+	lcd_Init(LCD_2004);
+	lcd_Print("Hola este es un super mensaje!");
 	
 	while (1)
-		;
+	{
+	}
+}
+
+void print(void *data, int period, int id)
+{
+	uartSendString("Periodic!\n\r");
 }
 
 void hardwareInit(void)

@@ -1,7 +1,7 @@
 #ifndef SSPI_H_
 #define SSPI_H_
 
-#include "macros.h"
+#include "utils.h"
 
 #define SPI SPI1
 #define SPI0_ALT // Map the SPI0 signals to PTE0, PTE1, PTE2 and PTE3

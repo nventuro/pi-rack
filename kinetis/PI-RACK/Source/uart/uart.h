@@ -2,7 +2,7 @@
 #define UART_H_
 
 #include "MKE02Z2.h"
-#include "macros.h"
+#include "utils.h"
 
 #define LOG_UART UART1
 
