@@ -1,4 +1,4 @@
-#N canvas 559 80 656 283 10;
+#N canvas 559 80 641 299 10;
 #N canvas 729 603 428 198 audio_in 0;
 #X obj -1682 -1297 outlet~;
 #X obj -1635 -1398 adc~;
@@ -29,7 +29,7 @@
 #X connect 11 0 5 0;
 #X connect 12 0 5 0;
 #X connect 13 0 0 0;
-#X restore 101 71 pd audio_in;
+#X restore 106 3 pd audio_in;
 #X obj 19 14 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0 1
 ;
 #X msg 19 35 \; pd dsp \$1;
@@ -114,7 +114,7 @@
 #X connect 39 0 2 0;
 #X connect 40 0 41 0;
 #X connect 41 0 37 0;
-#X restore 121 154 pd flanger;
+#X restore 126 145 pd flanger;
 #N canvas 757 421 289 153 audio_out 0;
 #X obj 9 107 dac~;
 #X obj 19 24 inlet~;
@@ -131,8 +131,8 @@
 #X connect 4 0 3 0;
 #X connect 4 0 6 0;
 #X connect 7 0 2 1;
-#X restore 101 221 pd audio_out;
-#X obj 238 88 hradio 15 1 0 7 empty empty empty 0 -8 0 10 -262144 -1
+#X restore 106 249 pd audio_out;
+#X obj 368 83 hradio 15 1 0 6 empty empty empty 0 -8 0 10 -262144 -1
 -1 0;
 #N canvas 205 92 563 287 tremolo 0;
 #X obj -1 -2 inlet~;
@@ -187,7 +187,7 @@
 #X connect 22 0 5 0;
 #X connect 23 0 4 0;
 #X connect 29 0 13 0;
-#X restore 197 155 pd tremolo;
+#X restore 202 146 pd tremolo;
 #N canvas 159 248 585 305 wahwah 0;
 #X obj 15 -206 inlet~;
 #X obj 15 -40 outlet~;
@@ -247,7 +247,7 @@
 #X connect 29 0 6 1;
 #X connect 29 0 8 1;
 #X connect 30 0 6 0;
-#X restore 276 156 pd wahwah;
+#X restore 281 147 pd wahwah;
 #N canvas 453 349 366 210 vibrato 0;
 #X obj 9 -49 inlet~;
 #X obj 10 139 outlet~;
@@ -282,7 +282,7 @@
 #X connect 16 0 5 1;
 #X connect 16 0 17 0;
 #X connect 17 0 6 1;
-#X restore 356 156 pd vibrato;
+#X restore 361 147 pd vibrato;
 #N canvas 227 181 532 321 step_vibrato 0;
 #X obj 9 -418 inlet~;
 #X obj 14 -215 *~;
@@ -337,7 +337,7 @@
 #X connect 24 0 25 0;
 #X connect 26 0 7 0;
 #X connect 26 0 17 0;
-#X restore 433 156 pd step_vibrato;
+#X restore 438 147 pd step_vibrato;
 #N canvas 1170 183 344 263 fuzz_ring 0;
 #X obj 24 63 *~;
 #X obj 25 24 inlet~;
@@ -368,21 +368,28 @@
 #X connect 9 0 4 0;
 #X connect 14 0 3 0;
 #X connect 15 0 9 1;
-#X restore 536 155 pd fuzz_ring;
-#X obj 102 114 demultiplex~ . . . . . . .;
+#X restore 541 146 pd fuzz_ring;
+#X obj 105 60 demultiplex~ . .;
+#X obj 221 45 hradio 15 1 0 2 empty empty empty 0 -8 0 10 -262144 -1
+-1 0;
+#X obj 197 98 demultiplex~ . . . . . .;
+#X text 461 82 Effect selection;
+#X text 256 43 Clean or effects mode;
 #X connect 0 0 11 0;
 #X connect 1 0 2 0;
 #X connect 3 0 4 0;
-#X connect 5 0 11 0;
+#X connect 5 0 13 0;
 #X connect 6 0 4 0;
 #X connect 7 0 4 0;
 #X connect 8 0 4 0;
 #X connect 9 0 4 0;
 #X connect 10 0 4 0;
 #X connect 11 0 4 0;
-#X connect 11 1 3 0;
-#X connect 11 2 6 0;
-#X connect 11 3 7 0;
-#X connect 11 4 8 0;
-#X connect 11 5 9 0;
-#X connect 11 6 10 0;
+#X connect 11 1 13 0;
+#X connect 12 0 11 0;
+#X connect 13 0 3 0;
+#X connect 13 1 6 0;
+#X connect 13 2 7 0;
+#X connect 13 3 8 0;
+#X connect 13 4 9 0;
+#X connect 13 5 10 0;
