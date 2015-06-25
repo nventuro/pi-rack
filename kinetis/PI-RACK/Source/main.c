@@ -26,12 +26,13 @@ enum {
 
 typedef struct
 {	
-	bool status;
-	bool can_toggle;
+	bool toggleable; // false for regular push buttons
+	bool status; // Indicates toggle status for toggleable buttons, or button presses (rising edge only) for non toggleable
+	bool waiting_for_release;
 	int gpio;
-} push_button_data_t;
+} button_data_t;
 
-push_button_data_t buttons[TOTAL_BUTTONS];
+button_data_t buttons[TOTAL_BUTTONS];
 
 #define MAX_EFFECTS 10
 #define EFFECT_NAME_LENGTH 20
@@ -56,6 +57,9 @@ typedef struct
 
 effect_data_t effects[MAX_EFFECTS];
 
+int currEffect;
+int loadedEffects;
+
 int main (void)
 {
 	hardwareInit();
@@ -78,6 +82,7 @@ int main (void)
 	uartInit();
 	
 	loadEffectsFromHost();
+	currEffect = 0;
 	
 	LED_ON(POWER_LED);
 			
@@ -95,16 +100,19 @@ int main (void)
 	sliders_Set(slider_values);
 	
 	buttons[PEDAL_IDX].status = _FALSE;
-	buttons[PEDAL_IDX].can_toggle = _TRUE;
+	buttons[PEDAL_IDX].waiting_for_release = _FALSE;
 	buttons[PEDAL_IDX].gpio = PEDAL;
+	buttons[PEDAL_IDX].toggleable = _TRUE;
 	
 	buttons[LEFT_IDX].status = _FALSE;
-	buttons[LEFT_IDX].can_toggle = _TRUE;
+	buttons[LEFT_IDX].waiting_for_release = _FALSE;
 	buttons[LEFT_IDX].gpio = BUTTON_LEFT;
+	buttons[LEFT_IDX].toggleable = _FALSE;
 		
 	buttons[RIGHT_IDX].status = _FALSE;
-	buttons[RIGHT_IDX].can_toggle = _TRUE;
-	buttons[RIGHT_IDX].gpio = BUTTON_RIGHT;	
+	buttons[RIGHT_IDX].waiting_for_release = _FALSE;
+	buttons[RIGHT_IDX].gpio = BUTTON_RIGHT;
+	buttons[RIGHT_IDX].toggleable = _FALSE;
 	
 	while (1)
 		;
@@ -117,7 +125,7 @@ void testPrint(void *data, int period, int id)
 	
 	if (buttons[PEDAL_IDX].status)
 	{
-		write += itoa(1, buffer + write, 10); // Effect number
+		write += itoa(currEffect + 1, buffer + write, 10); // Effect number
 	}
 	else
 	{
@@ -235,6 +243,8 @@ void loadEffectsFromHost(void)
 		
 		read++; // Advance to the next effect (or message ending)
 	}
+	
+	loadedEffects = effect_idx;
 }
 
 void initializeEffects(void)
@@ -262,19 +272,45 @@ void pinsPolling(void *data, int period, int id)
 {
 	for (int i = 0; i < TOTAL_BUTTONS; ++i)
 	{
-		if (buttons[i].can_toggle)
+		if (buttons[i].toggleable)
 		{
-			if (IS_PIN_ON(buttons[i].gpio))
+			if (!buttons[i].waiting_for_release)
 			{
-				buttons[i].status = !buttons[i].status;
-				buttons[i].can_toggle = _FALSE;
+				if (IS_PIN_ON(buttons[i].gpio))
+				{
+					buttons[i].status = !buttons[i].status;
+					buttons[i].waiting_for_release = _TRUE;
+				}
+			}
+			else
+			{
+				if (IS_PIN_OFF(buttons[i].gpio))
+				{
+					buttons[i].waiting_for_release = _FALSE;
+				}
 			}
 		}
 		else
 		{
-			if (IS_PIN_OFF(buttons[i].gpio))
+			if (IS_PIN_ON(buttons[i].gpio))
 			{
-				buttons[i].can_toggle = _TRUE;
+				if (buttons[i].waiting_for_release)
+				{
+					if (buttons[i].status) 
+					{
+						buttons[i].status = _FALSE; // The button's edge has already been processed
+					}
+				}
+				else // If button was released, press
+				{
+					buttons[i].status = _TRUE;
+					buttons[i].waiting_for_release = _TRUE;
+				}
+			}
+			else
+			{
+				buttons[i].status = _FALSE;
+				buttons[i].waiting_for_release = _FALSE;
 			}
 		}
 	}
@@ -286,6 +322,24 @@ void pinsPolling(void *data, int period, int id)
 	else
 	{
 		LED_OFF(STATUS_LED);
+	}
+	
+	if (buttons[LEFT_IDX].status)
+	{
+		currEffect--;
+		if (currEffect < 0)
+		{
+			currEffect = loadedEffects - 1;
+		}
+	}
+	
+	if (buttons[RIGHT_IDX].status)
+	{
+		currEffect++;
+		if (currEffect >= loadedEffects)
+		{
+			currEffect = 0;
+		}
 	}
 }
 
