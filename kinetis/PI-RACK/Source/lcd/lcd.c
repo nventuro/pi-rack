@@ -1,8 +1,8 @@
 #include "lcd.h"
 #include "MKE02Z2.h"
 
-#define LCD_RS_SET_INSTR() PIN_OFF(LCD_RS, LCD_RS_GPIO_PORT)
-#define LCD_RS_SET_DATA() PIN_ON(LCD_RS, LCD_RS_GPIO_PORT)
+#define LCD_RS_SET_INSTR() PIN_OFF(LCD_RS)
+#define LCD_RS_SET_DATA() PIN_ON(LCD_RS)
 
 #define LCD_DATA_LOW GLUE2(GPIO_PT, LCD_DATA_LOW_PORT, LCD_DATA_LOW_START)
 #define LCD_DATA_HIGH GLUE2(GPIO_PT, LCD_DATA_HIGH_PORT, LCD_DATA_HIGH_START)
@@ -82,16 +82,15 @@ void lcd_Init(lcd_type type)
 	// High nibble
 	PIN_MAKE_OUTPUT_MASK((0xF) << LCD_DATA_SHIFT(LCD_DATA_HIGH), LCD_DATA_HIGH_GPIO_PORT);
 	
-	PIN_MAKE_OUTPUT(LCD_ENABLE, LCD_ENABLE_GPIO_PORT);
-	PIN_MAKE_OUTPUT(LCD_RS, LCD_RS_GPIO_PORT);
+	PIN_MAKE_OUTPUT(LCD_ENABLE);
+	PIN_MAKE_OUTPUT(LCD_RS);
 	
-	PIN_OFF(LCD_ENABLE, LCD_ENABLE_GPIO_PORT);
+	PIN_OFF(LCD_ENABLE);
 		
 	// Initialize the driver's memory
 	lcd_data.type = type;
 	
-	int i;
-	for (i = 0; i < LCD_MEMORY; i++)
+	for (int i = 0; i < LCD_MEMORY; i++)
 	{
 		lcd_memory[i] = ' ';
 	}
@@ -295,15 +294,14 @@ void lcd_PrintCallback(void)
 
 void lcd_EnableStrobe(void)
 {
-	PIN_ON(LCD_ENABLE, LCD_ENABLE_GPIO_PORT);
+	PIN_ON(LCD_ENABLE);
 	
-	int i;
-	for (i = 0; i < LCD_ENABLE_NOPS; i++)
+	for (int i = 0; i < LCD_ENABLE_NOPS; i++)
 	{
 		asm("nop");
 	}
 	
-	PIN_OFF(LCD_ENABLE, LCD_ENABLE_GPIO_PORT);
+	PIN_OFF(LCD_ENABLE);
 }
 
 void lcd_SetData(int data)

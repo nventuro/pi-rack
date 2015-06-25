@@ -29,10 +29,10 @@ int itoa(int value, char *sp, int base)
 
     int len = tp - tmp;
 
-    if (sign) 
+    if (sign)
     {
-        *sp++ = '-';
-        len++;
+    	*sp++ = '-';
+    	len++;
     }
 
     while (tp > tmp)

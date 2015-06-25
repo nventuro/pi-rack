@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "core_cm0plus.h"
 
+#define ADC_MAX_VALUE ((1 << 12) - 1) // 12 bit conversion
+
 void sadc_Init(void);
 void sadc_InitChannel(int channel);
 

@@ -76,8 +76,7 @@ void sadc_StartFIFOConversion(int channels[])
 	}
 	else
 	{
-		int i;
-		for (i = 0; i < FIFODepth; ++i)
+		for (int i = 0; i < FIFODepth; ++i)
 		{
 			ADC->SC1 = (ADC->SC1 & ~ADC_SC1_ADCH_MASK) | ADC_SC1_ADCH(channels[i]); // Clear the channel selection bits and select each channel, in order
 		}
@@ -96,8 +95,7 @@ void sadc_GetFIFOResults(int results[])
 	}
 	else
 	{
-		int i;
-		for (i = 0; i < FIFODepth; ++i)
+		for (int i = 0; i < FIFODepth; ++i)
 		{
 			results[i] = ADC->R;
 		}

@@ -5,22 +5,22 @@
 #include "utils.h"
 
 // Inputs
-#define PEDAL GPIO_PTD0
+#define PEDAL GPIO_PTB2
 
-#define BUTTON_LEFT GPIO_PTB2
+#define BUTTON_LEFT GPIO_PTD0
 #define BUTTON_RIGHT GPIO_PTA0
 
-// Three position slider
-#define SLIDER_1_A GPIO_PTE5
-#define SLIDER_1_B GPIO_PTE6
+// Three position selector
+#define SELECTOR_1_A GPIO_PTE5
+#define SELECTOR_1_B GPIO_PTE6
 
-// Two position slider
-#define SLIDER_2_A GPIO_PTC5
+// Two position selector
+#define SELECTOR_2_A GPIO_PTC5
 
-// Four position slider
-#define SLIDER_3_A GPIO_PTE4
-#define SLIDER_3_B GPIO_PTB4
-#define SLIDER_3_C GPIO_PTD1
+// Four position selector
+#define SELECTOR_3_A GPIO_PTE4
+#define SELECTOR_3_B GPIO_PTB4
+#define SELECTOR_3_C GPIO_PTD1
 
 // Outputs
 #define POWER_LED GPIO_PTB0
@@ -35,5 +35,7 @@
 #define SLIDER_3_ADC_CH 10
 #define SLIDER_4_ADC_CH 11
 #define VOL_SLIDER_ADC_CH 15
+
+void gpioPinAssignements(void);
 
 #endif /* PINMAP_H_ */

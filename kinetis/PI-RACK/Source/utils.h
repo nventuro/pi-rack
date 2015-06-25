@@ -47,19 +47,33 @@ typedef int bool;
 #define _TRUE 1
 #define _FALSE 0
 
-#define PIN_MASK(pin) (GLUE(pin, _MASK))
+#define PIN_MASK(pin) (pin < GPIO_PTE0 ? (1 << pin) : (1 << (pin - GPIO_PTE0)))
+#define PUE_MASK(pin) PIN_MASK(pin)
 
-#define PIN_MAKE_OUTPUT(pin, port) (PIN_MAKE_OUTPUT_MASK(PIN_MASK(pin), port))
-#define PIN_MAKE_INPUT(pin, port)  (PIN_MAKE_INPUT_MASK(PIN_MASK(pin), port))
+#define GPIO_PORT(pin) (pin < GPIO_PTE0 ? GPIOA : GPIOB)
+
+#define PIN_MAKE_OUTPUT(pin) PIN_MAKE_OUTPUT_PORT(pin, GPIO_PORT(pin))
+#define PIN_MAKE_INPUT(pin)  PIN_MAKE_INPUT_PORT(pin, GPIO_PORT(pin))
+
+#define PIN_MAKE_OUTPUT_PORT(pin, port) (PIN_MAKE_OUTPUT_MASK(PIN_MASK(pin), port))
+#define PIN_MAKE_INPUT_PORT(pin, port)  (PIN_MAKE_INPUT_MASK(PIN_MASK(pin), port))
 
 #define PIN_MAKE_OUTPUT_MASK(pin_mask, port) (port->PDDR |= pin_mask)
 #define PIN_MAKE_INPUT_MASK(pin_mask, port)  (port->PIDR &= ~(pin_mask))
 
-#define PIN_ON(pin, port) (port->PSOR = PIN_MASK(pin))
-#define PIN_OFF(pin, port) (port->PCOR = PIN_MASK(pin))
+#define PIN_ENABLE_PULLUP(pin) do { if (pin < GPIO_PTE0) { PORT->PUEL |= (1 << pin); } else { PORT->PUEH |= (1 << (pin - GPIO_PTE0)); } } while (0)
 
-#define IS_PIN_ON(pin, port) (!IS_PIN_OFF(pin, port))
-#define IS_PIN_OFF(pin, port) ((port->PDIR & PIN_MASK(pin)) == 0)
+#define PIN_ON(pin) (PIN_ON_PORT(pin, GPIO_PORT(pin)))
+#define PIN_OFF(pin) (PIN_OFF_PORT(pin, GPIO_PORT(pin)))
+
+#define PIN_ON_PORT(pin, port) (port->PSOR = PIN_MASK(pin))
+#define PIN_OFF_PORT(pin, port) (port->PCOR = PIN_MASK(pin))
+
+#define IS_PIN_ON(pin) (IS_PIN_ON_PORT(pin, GPIO_PORT(pin)))
+#define IS_PIN_OFF(pin) (IS_PIN_OFF_PORT(pin, GPIO_PORT(pin)))
+
+#define IS_PIN_ON_PORT(pin, port) (!IS_PIN_OFF_PORT(pin, port))
+#define IS_PIN_OFF_PORT(pin, port) ((port->PDIR & PIN_MASK(pin)) == 0)
 
 int itoa(int value, char *sp, int base);
 

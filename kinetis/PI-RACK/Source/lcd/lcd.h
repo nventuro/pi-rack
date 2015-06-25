@@ -38,9 +38,7 @@ extern char lcd_memory[LCD_MEMORY];
 #define LCD_DATA_HIGH_START 0
 
 #define LCD_ENABLE GPIO_PTF0  // The enable (clock) pin.
-#define LCD_ENABLE_GPIO_PORT GPIOB
 #define LCD_RS GPIO_PTF1 // The Register Select pin.
-#define LCD_RS_GPIO_PORT GPIOB
 // The Read/Write pin should be connected to ground.
 
 void lcd_Init(lcd_type type);

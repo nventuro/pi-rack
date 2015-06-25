@@ -1,10 +1,60 @@
 #include "periph/uart/uart.h"
+#include "periph/rti/rti.h"
 #include "lcd/lcd.h"
 #include "sliders/sliders.h"
+#include "pinmap.h"
+#include "utils.h"
 #include "MKE02Z2.h"
 
 void hardwareInit(void);
-void gpioPinAssignements(void);
+
+void testPrint(void *data, int period, int id);
+void pinsPolling(void *data, int period, int id);
+
+void loadEffectsFromHost(void);
+void initializeEffects(void);
+
+int values[5];
+slider_data_t slider_values[5];
+
+enum {
+	PEDAL_IDX,
+	LEFT_IDX,
+	RIGHT_IDX,
+	TOTAL_BUTTONS
+} buttons_idx;
+
+typedef struct
+{	
+	bool status;
+	bool can_toggle;
+	int gpio;
+} push_button_data_t;
+
+push_button_data_t buttons[TOTAL_BUTTONS];
+
+#define MAX_EFFECTS 10
+#define EFFECT_NAME_LENGTH 20
+#define MAX_EFFECT_PARAMS 4
+#define PARAM_NAME_LENGTH 5
+
+typedef struct
+{
+	bool in_use;
+	char name[PARAM_NAME_LENGTH];
+	int min;
+	int max;
+	int regular;
+} effect_parameter_data_t;
+
+typedef struct
+{
+	bool in_use;
+	char name[EFFECT_NAME_LENGTH];
+	effect_parameter_data_t params[MAX_EFFECT_PARAMS];	
+} effect_data_t;
+
+effect_data_t effects[MAX_EFFECTS];
 
 int main (void)
 {
@@ -16,16 +66,227 @@ int main (void)
 			;
 	}
 	
-	uartInit();
-	uartSendString("AudioSystems - IO module online.\n\r");
+	gpioPinAssignements();
+	
+	LED_OFF(POWER_LED);
+	LED_OFF(STATUS_LED);
 
 	lcd_Init(LCD_2004);
-	lcd_Print("AudioSytems online");
+	lcd_PrintRow("AudioSytems online", 0);
+	lcd_PrintRow("Waiting for host", 1);
+	
+	uartInit();
+	
+	loadEffectsFromHost();
+	
+	LED_ON(POWER_LED);
+			
+	rti_Init();
+	rti_Register(testPrint, NULL, RTI_MS_TO_TICKS(20), RTI_NOW);
+	rti_Register(pinsPolling, NULL, RTI_MS_TO_TICKS(5), RTI_NOW);
+	
+	slider_values[0].value = &values[0];
+	slider_values[1].value = &values[1];
+	slider_values[2].value = &values[2];
+	slider_values[3].value = &values[3];
+	slider_values[4].value = &values[4];
 	
 	sliders_Init();
+	sliders_Set(slider_values);
+	
+	buttons[PEDAL_IDX].status = _FALSE;
+	buttons[PEDAL_IDX].can_toggle = _TRUE;
+	buttons[PEDAL_IDX].gpio = PEDAL;
+	
+	buttons[LEFT_IDX].status = _FALSE;
+	buttons[LEFT_IDX].can_toggle = _TRUE;
+	buttons[LEFT_IDX].gpio = BUTTON_LEFT;
+		
+	buttons[RIGHT_IDX].status = _FALSE;
+	buttons[RIGHT_IDX].can_toggle = _TRUE;
+	buttons[RIGHT_IDX].gpio = BUTTON_RIGHT;	
 	
 	while (1)
 		;
+}
+
+void testPrint(void *data, int period, int id)
+{
+	char buffer[50];
+	int write = 0;
+	
+	if (buttons[PEDAL_IDX].status)
+	{
+		write += itoa(1, buffer + write, 10); // Effect number
+	}
+	else
+	{
+		write += itoa(0, buffer + write, 10); // Effect number
+	}
+	
+	buffer[write++] = ' ';
+	write += itoa(values[0], buffer + write, 10); // Effect value 1
+	buffer[write++] = ' ';
+	write += itoa(values[1], buffer + write, 10); // Effect value 2
+	buffer[write++] = ' ';
+	write += itoa(values[2], buffer + write, 10); // Effect value 3
+	buffer[write++] = ' ';
+	write += itoa(values[3], buffer + write, 10); // Effect value 4
+	
+	buffer[write++] = ' ';
+	write += itoa(values[4], buffer + write, 10); // Volume
+	
+	buffer[write++] = '\n';
+	buffer[write++] = '\r';
+	
+	uartSendArray(buffer, write);
+}
+
+#define ESCAPE_WHITESPACE '%'
+#define ESCAPE_SEPARATOR '_'
+#define ESCAPE_EFFECT_END '?'
+#define ESCAPE_MESSAGE_END '&'
+
+void loadEffectsFromHost(void)
+{
+	initializeEffects();
+	
+	char received[500];
+	for (int i = 0; i < 500; ++i)
+	{
+		received[i] = '\0';
+	}
+	
+		
+	int write = 0;
+	bool done = _FALSE;
+	while ((!done) && (write < 500))
+	{
+		while (!uartIsDataReady())
+			;
+		
+		received[write] = uartRead();
+		if (received[write] == ESCAPE_MESSAGE_END)
+		{
+			done = _TRUE;
+		}
+		
+		write++;
+	}
+	
+	if (write > 500) 
+	{
+		error("Received message is over 500 characters and contains no ESCAPE_MESSAGE_END character.");
+	}
+
+	int read = 0;
+	int effect_idx = 0;
+	while ((read < write) && (received[read] != ESCAPE_MESSAGE_END))
+	{
+		// First comes the effect's name
+		effects[effect_idx].in_use = _TRUE;
+		int eff_name_idx = 0;
+		while ((eff_name_idx < EFFECT_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
+		{
+			effects[effect_idx].name[eff_name_idx++] = received[read++];
+		}
+		
+		// Read up to one character after the separator
+		while (received[read++] != ESCAPE_SEPARATOR)
+			;
+		
+		// We're now at the parameters
+		
+		int param_idx = 0;
+		
+		while (received[read] != ESCAPE_EFFECT_END)
+		{
+			int param_name_idx = 0;
+			while ((param_name_idx < PARAM_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
+			{
+				effects[effect_idx].params[param_idx].name[param_name_idx++] = received[read++];
+			}
+			
+			// Read up to one character after the separator
+			while (received[read++] != ESCAPE_SEPARATOR)
+				;
+			
+			// We're now at the parameter values
+			
+			/// WIP
+			// Skip all parameter values
+			int param_value_idx = 0;
+			while (param_value_idx < 3)
+			{
+				while (received[read++] != ESCAPE_SEPARATOR)
+					;
+				
+				param_value_idx++;
+			}
+			/// WIP END
+			
+			effects[effect_idx].params[param_idx].in_use = _TRUE;
+			param_idx++;
+			
+			// We're now at the next parameter (or next effect, or message ending)
+		}
+		
+		effect_idx++;
+		
+		read++; // Advance to the next effect (or message ending)
+	}
+}
+
+void initializeEffects(void)
+{
+	for (int i = 0; i < MAX_EFFECTS; ++i)
+	{
+		effects[i].in_use = _FALSE;
+		for (int n = 0; n < EFFECT_NAME_LENGTH; ++n)
+		{
+			effects[i].name[n] = ' ';
+		}
+		
+		for (int j = 0; j < MAX_EFFECT_PARAMS; ++j)
+		{
+			effects[i].params[j].in_use = _FALSE;
+			for (int n = 0; n < PARAM_NAME_LENGTH; ++n)
+			{
+				effects[i].params[j].name[n] = ' ';
+			}
+		}
+	}
+}
+
+void pinsPolling(void *data, int period, int id)
+{
+	for (int i = 0; i < TOTAL_BUTTONS; ++i)
+	{
+		if (buttons[i].can_toggle)
+		{
+			if (IS_PIN_ON(buttons[i].gpio))
+			{
+				buttons[i].status = !buttons[i].status;
+				buttons[i].can_toggle = _FALSE;
+			}
+		}
+		else
+		{
+			if (IS_PIN_OFF(buttons[i].gpio))
+			{
+				buttons[i].can_toggle = _TRUE;
+			}
+		}
+	}
+	
+	if (buttons[PEDAL_IDX].status)
+	{
+		LED_ON(STATUS_LED);
+	}
+	else
+	{
+		LED_OFF(STATUS_LED);
+	}
 }
 
 void hardwareInit(void)
@@ -75,16 +336,4 @@ void hardwareInit(void)
 	ICS->S |= ICS_S_LOLS_MASK;	
 	
 	return;
-}
-	
-void gpioPinAssignements(void)
-{
-	//PIN_MAKE_INPUT(PEDAL);
-	//PIN_MAKE_INPUT(BUTTON_LEFT);
-	//PIN_MAKE_INPUT(BUTTON_RIGHT);
-	
-	//PIN_MAKE_OUTPUT(POWER_LED);
-	//PIN_MAKE_OUTPUT(STATUS_LED);
-	
-	//PORT->PUEL |= PORT_PUEL_PTCPE5_MASK; // Enable pullup for PTC5
 }
