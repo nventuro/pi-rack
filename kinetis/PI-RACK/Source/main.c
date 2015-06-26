@@ -148,24 +148,24 @@ void testPrint(void *data, int period, int id)
 	
 	if (buttons[PEDAL_IDX].status)
 	{
-		write += itoa(currEffect + 1, buffer + write, 10); // Effect number
+		write += itoa(currEffect + 1, &(buffer[write]), 10); // Effect number
 	}
 	else
 	{
-		write += itoa(0, buffer + write, 10); // Effect number
+		write += itoa(0, &(buffer[write]), 10); // Effect number
 	}
 	
 	buffer[write++] = ' ';
-	write += itoa(values[0], buffer + write, 10); // Effect value 1
+	write += itoa(values[0], &(buffer[write]), 10); // Effect value 1
 	buffer[write++] = ' ';
-	write += itoa(values[1], buffer + write, 10); // Effect value 2
+	write += itoa(values[1], &(buffer[write]), 10); // Effect value 2
 	buffer[write++] = ' ';
-	write += itoa(values[2], buffer + write, 10); // Effect value 3
+	write += itoa(values[2], &(buffer[write]), 10); // Effect value 3
 	buffer[write++] = ' ';
-	write += itoa(values[3], buffer + write, 10); // Effect value 4
+	write += itoa(values[3], &(buffer[write]), 10); // Effect value 4
 	
 	buffer[write++] = ' ';
-	write += itoa(values[4], buffer + write, 10); // Volume
+	write += itoa(values[4], &(buffer[write]), 10); // Volume
 	
 	buffer[write++] = '\n';
 	buffer[write++] = '\r';
@@ -354,8 +354,8 @@ void printCurrentEffect(void)
 		{
 			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), effects[currEffect].params[i].name, PARAM_NAME_LENGTH);
 			
-			// Parameter values are written next to the parameter name, with an empty space between (hence the +1)
-			int2dToASCII(&(lcd_memory[start_row * LCD_2004_COLS + start_col + PARAM_NAME_LENGTH + 1]), effects[currEffect].params[i].current, PARAM_VALUE_LENGTH);
+			// Parameter values are written next to the parameter name
+			int2dToASCII(&(lcd_memory[start_row * LCD_2004_COLS + start_col + PARAM_NAME_LENGTH]), effects[currEffect].params[i].current, PARAM_VALUE_LENGTH);
 		}
 		else
 		{
@@ -438,6 +438,10 @@ void int2dToASCII(char *buff, int2d value, int max_chars)
 	{
 		value *= -1;
 		(*buff) = '-';
+	}
+	else
+	{
+		(*buff) = ' ';
 	}
 	
 	buff++;
