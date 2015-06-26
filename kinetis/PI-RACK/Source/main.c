@@ -57,7 +57,7 @@ typedef int int2d;
 int2d parseASCIIValue(char *buff, int *read);
 void asciiToString(char *src, int *read, char *dst, int max_length);
 int intPow(int base, int exp);
-void int2dToASCII(char *buff, int2d value, int max_chars);
+int int2dToASCII(char *buff, int2d value, int max_chars);
 
 typedef struct
 {
@@ -156,13 +156,13 @@ void testPrint(void *data, int period, int id)
 	}
 	
 	buffer[write++] = ' ';
-	write += itoa(values[0], &(buffer[write]), 10); // Effect value 1
+	write += int2dToASCII(&(buffer[write]), effects[currEffect].params[0].current, PARAM_VALUE_LENGTH); // Effect value 1
 	buffer[write++] = ' ';
-	write += itoa(values[1], &(buffer[write]), 10); // Effect value 2
+	write += int2dToASCII(&(buffer[write]), effects[currEffect].params[1].current, PARAM_VALUE_LENGTH); // Effect value 2
 	buffer[write++] = ' ';
-	write += itoa(values[2], &(buffer[write]), 10); // Effect value 3
+	write += int2dToASCII(&(buffer[write]), effects[currEffect].params[2].current, PARAM_VALUE_LENGTH); // Effect value 3
 	buffer[write++] = ' ';
-	write += itoa(values[3], &(buffer[write]), 10); // Effect value 4
+	write += int2dToASCII(&(buffer[write]), effects[currEffect].params[3].current, PARAM_VALUE_LENGTH); // Effect value 4
 	
 	buffer[write++] = ' ';
 	write += itoa(values[4], &(buffer[write]), 10); // Volume
@@ -263,6 +263,7 @@ void initializeEffects(void)
 		for (int j = 0; j < MAX_EFFECT_PARAMS; ++j)
 		{
 			effects[i].params[j].in_use = _FALSE;
+			effects[i].params[j].current = 0;
 			for (int n = 0; n < PARAM_NAME_LENGTH; ++n)
 			{
 				effects[i].params[j].name[n] = ' ';
@@ -436,7 +437,7 @@ int2d parseASCIIValue(char *buff, int *read)
 	return result;
 }
 
-void int2dToASCII(char *buff, int2d value, int max_chars)
+int int2dToASCII(char *buff, int2d value, int max_chars)
 {
 	if (value < 0)
 	{
@@ -483,7 +484,12 @@ void int2dToASCII(char *buff, int2d value, int max_chars)
 	}
 	while (!(((value / 100) <= upper_range) && ((value / 100) >= lower_range)));
 	
-	int write_pos = (dec_pos != 1 ? 0 : 1); // If dec_pos is 1, we lose one of the digits (else there'd be no digit after the decimal point)
+	int write_pos = 0;
+	if (dec_pos == 1)
+	{
+		buff[write_pos++] = ' '; // If dec_pos is 1, we lose one of the digits (else there'd be no digit after the decimal point)
+	}
+	
 	int written_digits = 0;
 	while (write_pos < max_chars)
 	{
@@ -500,6 +506,8 @@ void int2dToASCII(char *buff, int2d value, int max_chars)
 		     
 		write_pos++;
 	}
+	
+	return max_chars + 1; // This always writes the same number of characters (the +1 is because of the whitespace or '-' character at the start)
 }
 
 int intPow(int base, int exp)
