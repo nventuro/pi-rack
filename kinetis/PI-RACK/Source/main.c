@@ -47,13 +47,27 @@ button_data_t buttons[TOTAL_BUTTONS];
 #define VOLUME_MSG "Volume"
 #define VOLUME_MSG_LENGTH 6 // 6 == strlen("Volume")
 
+#define PARAM_VALUE_LENGTH 4
+
+// The different parameter values are stored in a somewhat special format: they are fixed point, but the value stored 
+// is actually the represented value times 100. Therefore, each value holds two decimal digits.
+// For example, 205 is actually 2.05, 5 is 0.05, and 1000 is 10.00
+typedef int int2d;
+
+int2d parseASCIIValue(char *buff, int *read);
+void asciiToString(char *src, int *read, char *dst, int max_length);
+int intPow(int base, int exp);
+void int2dToASCII(char *buff, int2d value, int max_chars);
+
 typedef struct
 {
 	bool in_use;
 	char name[PARAM_NAME_LENGTH];
-	int min;
-	int max;
-	int regular;
+	
+	int2d min;
+	int2d max;
+	int2d regular;
+	int2d current;
 } effect_parameter_data_t;
 
 typedef struct
@@ -85,7 +99,7 @@ int main (void)
 
 	lcd_Init(LCD_2004);
 	lcd_PrintRow("AudioSytems online", 0);
-	lcd_PrintRow("Waiting for host", 1);
+	lcd_PrintRow("     Please wait", 3);
 	
 	buttons[PEDAL_IDX].status = _FALSE;
 	buttons[PEDAL_IDX].waiting_for_release = _FALSE;
@@ -202,20 +216,8 @@ void loadEffectsFromHost(void)
 	{
 		// First comes the effect's name
 		effects[effect_idx].in_use = _TRUE;
-		int eff_name_idx = 0;
-		while ((eff_name_idx < EFFECT_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
-		{
-			char val = received[read++];
-			if (val == ESCAPE_WHITESPACE)
-			{
-				val = ' ';
-			}
-			effects[effect_idx].name[eff_name_idx++] = val;
-		}
 		
-		// Read up to one character after the separator
-		while (received[read++] != ESCAPE_SEPARATOR)
-			;
+		asciiToString(received, &read, effects[effect_idx].name, EFFECT_NAME_LENGTH);
 		
 		// We're now at the parameters
 		
@@ -223,34 +225,16 @@ void loadEffectsFromHost(void)
 		
 		while (received[read] != ESCAPE_EFFECT_END)
 		{
-			int param_name_idx = 0;
-			while ((param_name_idx < PARAM_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
-			{
-				char val = received[read++];
-				if (val == ESCAPE_WHITESPACE)
-				{
-					val = ' ';
-				}
-				effects[effect_idx].params[param_idx].name[param_name_idx++] = val;
-			}
+			// Parameter name
+			asciiToString(received, &read, effects[effect_idx].params[param_idx].name, PARAM_NAME_LENGTH);
+
+			// Parameter values, in order: min - regular - max
+			effects[effect_idx].params[param_idx].min = parseASCIIValue(received, &read);
+			effects[effect_idx].params[param_idx].regular = parseASCIIValue(received, &read);
+			effects[effect_idx].params[param_idx].max = parseASCIIValue(received, &read);
 			
-			// Read up to one character after the separator
-			while (received[read++] != ESCAPE_SEPARATOR)
-				;
-			
-			// We're now at the parameter values
-			
-			/// WIP
-			// Skip all parameter values
-			int param_value_idx = 0;
-			while (param_value_idx < 3)
-			{
-				while (received[read++] != ESCAPE_SEPARATOR)
-					;
-				
-				param_value_idx++;
-			}
-			/// WIP END
+			// Each parameters starts set at the regular value
+			effects[effect_idx].params[param_idx].current = effects[effect_idx].params[param_idx].regular;
 			
 			effects[effect_idx].params[param_idx].in_use = _TRUE;
 			param_idx++;
@@ -291,46 +275,35 @@ void pinsPolling(void *data, int period, int id)
 {
 	for (int i = 0; i < TOTAL_BUTTONS; ++i)
 	{
-		if (buttons[i].toggleable)
+		if (IS_PIN_ON(buttons[i].gpio))
 		{
-			if (!buttons[i].waiting_for_release)
+			if (buttons[i].waiting_for_release)
 			{
-				if (IS_PIN_ON(buttons[i].gpio))
+				if (!buttons[i].toggleable && buttons[i].status)
 				{
-					buttons[i].status = !buttons[i].status;
-					buttons[i].waiting_for_release = _TRUE;
+					buttons[i].status = _FALSE; // The button's edge has already been processed, do nothing for toggleables
 				}
 			}
-			else
+			else // Process button rising edge
 			{
-				if (IS_PIN_OFF(buttons[i].gpio))
+				if (buttons[i].toggleable)
 				{
-					buttons[i].waiting_for_release = _FALSE;
+					buttons[i].status = !buttons[i].status;
 				}
+				else
+				{
+					buttons[i].status = _TRUE;
+				}
+				buttons[i].waiting_for_release = _TRUE;
 			}
 		}
 		else
 		{
-			if (IS_PIN_ON(buttons[i].gpio))
-			{
-				if (buttons[i].waiting_for_release)
-				{
-					if (buttons[i].status) 
-					{
-						buttons[i].status = _FALSE; // The button's edge has already been processed
-					}
-				}
-				else // If button was released, press
-				{
-					buttons[i].status = _TRUE;
-					buttons[i].waiting_for_release = _TRUE;
-				}
-			}
-			else
+			if (!buttons[i].toggleable)
 			{
 				buttons[i].status = _FALSE;
-				buttons[i].waiting_for_release = _FALSE;
 			}
+			buttons[i].waiting_for_release = _FALSE;
 		}
 	}
 	
@@ -380,6 +353,9 @@ void printCurrentEffect(void)
 		if (effects[currEffect].params[i].in_use)
 		{
 			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), effects[currEffect].params[i].name, PARAM_NAME_LENGTH);
+			
+			// Parameter values are written next to the parameter name, with an empty space between (hence the +1)
+			int2dToASCII(&(lcd_memory[start_row * LCD_2004_COLS + start_col + PARAM_NAME_LENGTH + 1]), effects[currEffect].params[i].current, PARAM_VALUE_LENGTH);
 		}
 		else
 		{
@@ -389,6 +365,145 @@ void printCurrentEffect(void)
 	
 	// Volume
 	strncpy(&(lcd_memory[3 * LCD_2004_COLS]), VOLUME_MSG, VOLUME_MSG_LENGTH);
+}
+
+
+void asciiToString(char *src, int *read, char *dst, int max_length)
+{
+	int dst_idx = 0;
+	while ((dst_idx < max_length) && (src[*read] != ESCAPE_SEPARATOR))
+	{
+		char val = src[(*read)++];
+		if (val == ESCAPE_WHITESPACE)
+		{
+			val = ' ';
+		}
+		dst[dst_idx++] = val;
+	}
+
+	// Read up to one character after the separator
+	while (src[(*read)++] != ESCAPE_SEPARATOR)
+		;
+}
+
+int2d parseASCIIValue(char *buff, int *read)
+{
+	int2d result = 0;
+	
+	bool is_neg = _FALSE;
+	bool seen_point = _FALSE;
+	int decimals_seen = 0;
+	
+	char val; 
+	while ((val = buff[(*read)++]) != ESCAPE_SEPARATOR)
+	{
+		if (val == '.')
+		{
+			seen_point = _TRUE;
+		}
+		else if (val == '-')
+		{
+			is_neg = _TRUE;
+		}
+		else
+		{
+			result = result * 10 + val - '0';
+			if (seen_point)
+			{
+				decimals_seen++;
+			}
+		}
+	}
+	
+	if (decimals_seen < 2)
+	{
+		result *= intPow(10, 2 - decimals_seen);
+	}
+	else if (decimals_seen > 2)
+	{
+		result /= intPow(10, decimals_seen - 2);
+	}
+	
+	if (is_neg)
+	{
+		result *= -1;
+	}
+	
+	return result;
+}
+
+void int2dToASCII(char *buff, int2d value, int max_chars)
+{
+	if (value < 0)
+	{
+		value *= -1;
+		(*buff) = '-';
+	}
+	
+	buff++;
+	
+	// Position where the decimal point would be (counting from the right, last character is position 1),
+	// if the number was constrained to max_chars digits.
+	// A dec_pos of 0 means the decimal point isn't displayed (it's right after the last digit).
+	// A dec_pos of 1 means the decimal point is the last digit (in which case we use a length of max_chars - 1
+	// and don't display the decimal point).
+	// A dec_pos between 2 and max_chars - 1 means the decimal point is displayed.
+	// A dec_pos >= max_chars means the number cannot be correctly displayed (it's too small).
+	// A dec_pos < 0 means the number cannot be correctly displayed (it's too large).
+	int dec_pos = -1;
+	
+	int upper_range;
+	int lower_range;
+	
+	do
+	{
+		dec_pos++;
+		
+		upper_range = intPow(10, max_chars - dec_pos) - 1;
+		lower_range = intPow(10, max_chars - 1 - dec_pos);
+		
+		if ((value / 100) > upper_range) // If value is too large
+		{
+			break;
+		}
+		
+		if (dec_pos == (max_chars - 1)) // Value is either too small, or as small as possible (dec_pos being 
+										// equal to maa_chars means there's no leading zero before the decimal point)
+		{
+			break;
+		}
+	}
+	while (!(((value / 100) <= upper_range) && ((value / 100) >= lower_range)));
+	
+	int write_pos = (dec_pos != 1 ? 0 : 1); // If dec_pos is 1, we lose one of the digits (else there'd be no digit after the decimal point)
+	int written_digits = 0;
+	while (write_pos < max_chars)
+	{
+		if (((write_pos) == (max_chars - dec_pos)) && (dec_pos != 1)) // We skip the decimal point position rule for dec_pos = 1 (otherwise the point would be at the end)
+		{
+			buff[write_pos] = '.';
+		}
+		else
+		{
+			buff[write_pos] = (value / intPow(10, max_chars + 2 - 1 - dec_pos - written_digits) % 10) + '0';
+			
+			written_digits++;
+		}
+		     
+		write_pos++;
+	}
+}
+
+int intPow(int base, int exp)
+{
+	int result = 1;
+
+	while ((exp--) > 0)
+	{
+		result *= base;
+	}
+
+    return result;
 }
 
 void hardwareInit(void)
