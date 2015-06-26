@@ -37,7 +37,7 @@ typedef struct
 button_data_t buttons[TOTAL_BUTTONS];
 
 #define MAX_EFFECTS 10
-#define EFFECT_NAME_LENGTH 15
+#define EFFECT_NAME_LENGTH 9
 #define MAX_EFFECT_PARAMS 4
 #define PARAM_NAME_LENGTH 5
 
@@ -347,9 +347,12 @@ void printCurrentEffect(void)
 	// Parameters
 	for (int i = 0; i < MAX_EFFECT_PARAMS; ++i)
 	{
-		int start_row = ((i / 2) + 1);
-		int start_col = (i % 2) * LCD_2004_COLS / 2;
-				
+		int start_row = i;
+		int start_col = LCD_2004_COLS / 2;
+		
+		// Separator
+		lcd_memory[start_row * LCD_2004_COLS + start_col - 1] = '|';
+		
 		if (effects[currEffect].params[i].in_use)
 		{
 			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), effects[currEffect].params[i].name, PARAM_NAME_LENGTH);
@@ -364,7 +367,8 @@ void printCurrentEffect(void)
 	}
 	
 	// Volume
-	strncpy(&(lcd_memory[3 * LCD_2004_COLS]), VOLUME_MSG, VOLUME_MSG_LENGTH);
+	strncpy(&(lcd_memory[2 * LCD_2004_COLS]), VOLUME_MSG, VOLUME_MSG_LENGTH);
+	strncpy(&(lcd_memory[3 * LCD_2004_COLS]), "[-|-----]", 9);
 }
 
 
