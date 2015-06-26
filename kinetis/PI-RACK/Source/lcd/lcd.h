@@ -61,6 +61,10 @@ void lcd_PrintRow(char* string, int row);
 // Calling lcd_Print is the same as copying string in lcd_memory, on the positions corresponding to the
 // selected row, filling the rest of it with whitespaces.
 
+void lcd_ClearScreen(void);
+// Clears the screen contents. This actually clears lcd_memory, and can be called before writing new content so that no stray characters
+// are mistakenly drawn.
+
 void lcd_ISR(void);
 // Interrupt function. To be registered on the vector table under the PIT[LCD_PIT_CH] interrupt
 

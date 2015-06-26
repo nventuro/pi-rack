@@ -47,6 +47,16 @@ typedef int bool;
 #define _TRUE 1
 #define _FALSE 0
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 #define PIN_MASK(pin) (pin < GPIO_PTE0 ? (1 << pin) : (1 << (pin - GPIO_PTE0)))
 #define PUE_MASK(pin) PIN_MASK(pin)
 

@@ -5,6 +5,7 @@
 #include "pinmap.h"
 #include "utils.h"
 #include "MKE02Z2.h"
+#include <string.h>
 
 void hardwareInit(void);
 
@@ -13,6 +14,7 @@ void pinsPolling(void *data, int period, int id);
 
 void loadEffectsFromHost(void);
 void initializeEffects(void);
+void printCurrentEffect(void);
 
 int values[5];
 slider_data_t slider_values[5];
@@ -35,9 +37,15 @@ typedef struct
 button_data_t buttons[TOTAL_BUTTONS];
 
 #define MAX_EFFECTS 10
-#define EFFECT_NAME_LENGTH 20
+#define EFFECT_NAME_LENGTH 15
 #define MAX_EFFECT_PARAMS 4
 #define PARAM_NAME_LENGTH 5
+
+#define NO_PARAM_MSG "----"
+#define NO_PARAM_MSG_LENGHT 4 // 4 == strlen("----")
+
+#define VOLUME_MSG "Volume"
+#define VOLUME_MSG_LENGTH 6 // 6 == strlen("Volume")
 
 typedef struct
 {
@@ -79,26 +87,6 @@ int main (void)
 	lcd_PrintRow("AudioSytems online", 0);
 	lcd_PrintRow("Waiting for host", 1);
 	
-	uartInit();
-	
-	loadEffectsFromHost();
-	currEffect = 0;
-	
-	LED_ON(POWER_LED);
-			
-	rti_Init();
-	rti_Register(testPrint, NULL, RTI_MS_TO_TICKS(20), RTI_NOW);
-	rti_Register(pinsPolling, NULL, RTI_MS_TO_TICKS(5), RTI_NOW);
-	
-	slider_values[0].value = &values[0];
-	slider_values[1].value = &values[1];
-	slider_values[2].value = &values[2];
-	slider_values[3].value = &values[3];
-	slider_values[4].value = &values[4];
-	
-	sliders_Init();
-	sliders_Set(slider_values);
-	
 	buttons[PEDAL_IDX].status = _FALSE;
 	buttons[PEDAL_IDX].waiting_for_release = _FALSE;
 	buttons[PEDAL_IDX].gpio = PEDAL;
@@ -113,6 +101,27 @@ int main (void)
 	buttons[RIGHT_IDX].waiting_for_release = _FALSE;
 	buttons[RIGHT_IDX].gpio = BUTTON_RIGHT;
 	buttons[RIGHT_IDX].toggleable = _FALSE;
+	
+	uartInit();
+		
+	loadEffectsFromHost();
+	currEffect = 0;
+	
+	LED_ON(POWER_LED);
+			
+	rti_Init();
+	rti_Register(testPrint, NULL, RTI_MS_TO_TICKS(20), RTI_NOW);
+	rti_Register(pinsPolling, NULL, RTI_MS_TO_TICKS(5), RTI_NOW);
+	
+	// Change for curr effect value
+	slider_values[0].value = &values[0];
+	slider_values[1].value = &values[1];
+	slider_values[2].value = &values[2];
+	slider_values[3].value = &values[3];
+	slider_values[4].value = &values[4];
+	
+	sliders_Init();
+	sliders_Set(slider_values);
 	
 	while (1)
 		;
@@ -196,7 +205,12 @@ void loadEffectsFromHost(void)
 		int eff_name_idx = 0;
 		while ((eff_name_idx < EFFECT_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
 		{
-			effects[effect_idx].name[eff_name_idx++] = received[read++];
+			char val = received[read++];
+			if (val == ESCAPE_WHITESPACE)
+			{
+				val = ' ';
+			}
+			effects[effect_idx].name[eff_name_idx++] = val;
 		}
 		
 		// Read up to one character after the separator
@@ -212,7 +226,12 @@ void loadEffectsFromHost(void)
 			int param_name_idx = 0;
 			while ((param_name_idx < PARAM_NAME_LENGTH) && (received[read] != ESCAPE_SEPARATOR))
 			{
-				effects[effect_idx].params[param_idx].name[param_name_idx++] = received[read++];
+				char val = received[read++];
+				if (val == ESCAPE_WHITESPACE)
+				{
+					val = ' ';
+				}
+				effects[effect_idx].params[param_idx].name[param_name_idx++] = val;
 			}
 			
 			// Read up to one character after the separator
@@ -341,6 +360,35 @@ void pinsPolling(void *data, int period, int id)
 			currEffect = 0;
 		}
 	}
+	
+	printCurrentEffect();
+}
+
+void printCurrentEffect(void)
+{
+	lcd_ClearScreen();
+	
+	// Effect name
+	strncpy(&(lcd_memory[0 * LCD_2004_COLS]), effects[currEffect].name, EFFECT_NAME_LENGTH);
+	
+	// Parameters
+	for (int i = 0; i < MAX_EFFECT_PARAMS; ++i)
+	{
+		int start_row = ((i / 2) + 1);
+		int start_col = (i % 2) * LCD_2004_COLS / 2;
+				
+		if (effects[currEffect].params[i].in_use)
+		{
+			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), effects[currEffect].params[i].name, PARAM_NAME_LENGTH);
+		}
+		else
+		{
+			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), NO_PARAM_MSG, min(PARAM_NAME_LENGTH, NO_PARAM_MSG_LENGHT));
+		}
+	}
+	
+	// Volume
+	strncpy(&(lcd_memory[3 * LCD_2004_COLS]), VOLUME_MSG, VOLUME_MSG_LENGTH);
 }
 
 void hardwareInit(void)

@@ -44,7 +44,7 @@
 #define LCD_WRITE_DDRAM BIT(7)
 
 // Some displays work with a very short enable pulse. For those, make LCD_ENABLE_NOPS lower
-#define LCD_ENABLE_NOPS 150
+#define LCD_ENABLE_NOPS 50
 
 #define LCD_SHORT_DELAY_US 200
 #define LCD_LONG_DELAY_US 3200
@@ -368,5 +368,13 @@ void lcd_PrintRow(char* string, int row)
 		}
 		while (i < 20)
 			lcd_memory[i++ + row*20] = ' ';
+	}
+}
+
+void lcd_ClearScreen(void)
+{
+	for (int i = 0; i < LCD_MEMORY; ++i)
+	{
+		lcd_memory[i] = ' ';
 	}
 }
