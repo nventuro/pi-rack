@@ -1,8 +1,15 @@
 #include "uart.h"
 #include <string.h>
 
+bool uartIsInit = _FALSE;
+
 void uartInit(void)
 {
+	if (uartIsInit)
+	{
+		return;
+	}
+	
 	SIM->SCGC |= SIM_SCGC_UART1_MASK;
 	
 	UART_MODULE->C1 = 0x00;
@@ -10,6 +17,8 @@ void uartInit(void)
 	
 	UART_MODULE->BDH = UART_BDH_SBR(0);
 	UART_MODULE->BDL = UART_BDL_SBR(11);
+
+	uartIsInit = _TRUE;
 	
 	return;
 }
