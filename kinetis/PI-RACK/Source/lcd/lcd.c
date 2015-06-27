@@ -62,6 +62,8 @@ struct
 
 bool lcd_isInit = _FALSE;
 
+bool updatingScreen = _FALSE;
+
 void lcd_InitCallback (void);
 void lcd_PrintCallback (void);
 
@@ -246,6 +248,11 @@ void lcd_ChangePeriod(int new_period_us)
 
 void lcd_PrintCallback(void)
 {
+	if (updatingScreen)
+	{
+		return;
+	}
+	
 	LCD_RS_SET_DATA();
 	lcd_SetData(lcd_memory[lcd_data.index++]);
 	lcd_EnableStrobe();

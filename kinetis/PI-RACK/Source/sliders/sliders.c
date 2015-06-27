@@ -63,15 +63,15 @@ slider_pos sliders_GetPos(int param_idx)
 	{
 		return BIG_DECREASE;
 	}
-	else if (val < 45) // From 2% to 45%
+	else if (val < 40) // From 2% to 40%
 	{
 		return SLIGHT_DECREASE;
 	}
-	else if (val <= 55) // From 45% to 55%
+	else if (val <= 60) // From 40% to 60%
 	{
 		return KEEP;
 	}
-	else if (val < 98) // From 55% to 98%
+	else if (val < 98) // From 60% to 98%
 	{
 		return SLIGHT_INCREASE;
 	}

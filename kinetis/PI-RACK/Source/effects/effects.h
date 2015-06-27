@@ -2,6 +2,7 @@
 #define EFFECTS_H_
 
 #include "ascii/ascii.h"
+#include "sliders/sliders.h"
 #include "utils.h"
 
 #define MAX_EFFECTS 10
@@ -53,6 +54,8 @@ void initializeEffects(void);
 // with their parameters and the min, max and regular values for each of them.
 // When loadEffectsFromHost returns, effects and numLoadedEffects contain valid data.
 void loadEffectsFromHost(void);
+
+int2d getParameterIncrement(slider_pos pos, int2d min, int2d max);
 
 
 #endif /* EFFECTS_H_ */

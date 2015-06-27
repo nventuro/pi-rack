@@ -12,6 +12,8 @@
 
 #define SYSTEM_LOOP_PERIOD_MS 10
 
+#define EFFECT_UPDATE_SLOWDOWN 10
+
 void systemLoop(void);
 void enableNextPass(void *data, int period, int id);
 
@@ -39,6 +41,7 @@ typedef struct
 button_data_t buttons[TOTAL_BUTTONS];
 
 bool waitingForNextPass;
+int passesUntilEffectUpdate;
 
 void systemStart(void)
 {
@@ -77,6 +80,9 @@ void systemStart(void)
 		
 	rti_Init();
 	rti_Register(enableNextPass, NULL, RTI_MS_TO_TICKS(SYSTEM_LOOP_PERIOD_MS), RTI_NOW);
+	
+	waitingForNextPass = _FALSE;
+	passesUntilEffectUpdate = 0;
 	
 	systemLoop();
 }
@@ -117,7 +123,11 @@ void systemLoop(void)
 			}
 		}
 		
-		updateEffectValues();
+		passesUntilEffectUpdate = (passesUntilEffectUpdate + 1) % EFFECT_UPDATE_SLOWDOWN;
+		if (passesUntilEffectUpdate == 0)
+		{
+			updateEffectValues();	
+		}
 			
 		printToLCD();
 		
@@ -180,6 +190,16 @@ void updateEffectValues(void)
 		}
 		
 		slider_pos pos = sliders_GetPos(i);
+		effects[currEffect].params[i].current += getParameterIncrement(pos, effects[currEffect].params[i].min, effects[currEffect].params[i].max);
+		
+		if (effects[currEffect].params[i].current > effects[currEffect].params[i].max)
+		{
+			effects[currEffect].params[i].current = effects[currEffect].params[i].max;
+		}
+		else if (effects[currEffect].params[i].current < effects[currEffect].params[i].min)
+		{
+			effects[currEffect].params[i].current = effects[currEffect].params[i].min;
+		}
 	}
 	
 	// Volume
@@ -189,6 +209,8 @@ void updateEffectValues(void)
 
 void printToLCD(void)
 {
+	updatingScreen = _TRUE;
+	
 	lcd_ClearScreen();
 	
 	// Effect name
@@ -219,6 +241,8 @@ void printToLCD(void)
 			strncpy(&(lcd_memory[start_row * LCD_2004_COLS + start_col]), NO_PARAM_MSG, min(PARAM_NAME_LENGTH, NO_PARAM_MSG_LENGHT));
 		}
 	}
+	
+	updatingScreen = _FALSE;
 }
 
 void intToBar(char *dst, int value, int min, int max, int length)

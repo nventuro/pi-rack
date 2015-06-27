@@ -45,6 +45,9 @@ void lcd_Init(lcd_type type);
 // Initializes the LCD module. type determines the number of rows and columns the module expects the device to have. A wrong value on type will 
 // cause faulty behavior. After lcd_Init is called, type cannot be changed.
 
+// While this is set to _TRUE, the LCD module won't update the screen contents
+extern bool updatingScreen;
+
 void lcd_Print(char* string);
 // Prints a string on the device, starting on the first row and first column. 
 // If the string is not null-terminated, or too long, the module will only print as many characters as the device is capable of displaying.

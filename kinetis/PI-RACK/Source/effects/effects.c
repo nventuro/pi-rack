@@ -103,3 +103,35 @@ void loadEffectsFromHost(void)
 	
 	numLoadedEffects = effect_idx;
 }
+
+int2d getParameterIncrement(slider_pos pos, int2d min, int2d max)
+{			
+	int2d slight_inc = max((max-min) / 200, 1);
+	int2d big_inc = max((max-min) / 50, 1);
+	
+	int2d inc;
+	switch (pos)
+	{
+		case BIG_DECREASE:
+			inc = -big_inc;
+			break;
+		
+		case SLIGHT_DECREASE:
+			inc = -slight_inc;
+			break;
+			
+		case KEEP:
+			inc = 0;
+			break;
+		
+		case SLIGHT_INCREASE:
+			inc = slight_inc;
+			break;
+			
+		case BIG_INCREASE:
+			inc = big_inc;
+			break;
+	}
+	
+	return inc;
+}
