@@ -1,9 +1,9 @@
 #N canvas 779 173 625 353 10;
-#N canvas 847 590 428 198 audio_in 0;
+#N canvas 847 590 428 198 audio_in 1;
 #X obj -1682 -1297 outlet~;
 #X obj -1635 -1398 adc~;
 #X obj -1681 -1419 hradio 15 1 1 3 empty empty empty 0 -8 0 10 -262144
--1 -1 2;
+-1 -1 1;
 #X msg -1588 -1443 start;
 #X msg -1582 -1423 stop;
 #X obj -1588 -1400 readsf~ 2;
