@@ -6,6 +6,8 @@ effect_data_t effects[MAX_EFFECTS];
 int currEffect;
 int numLoadedEffects;
 
+int2d volume;
+
 void initializeEffects(void)
 {
 	for (int i = 0; i < MAX_EFFECTS; ++i)
@@ -30,6 +32,8 @@ void initializeEffects(void)
 
 void loadEffectsFromHost(void)
 {
+	initializeEffects();
+	
 	uartInit();
 	
 	char received[500];

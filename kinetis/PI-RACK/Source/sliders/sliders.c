@@ -3,12 +3,14 @@
 #include "periph/sadc/sadc.h"
 #include "periph/rti/rti.h"
 
-void sliders_Tick(void *data, int period, int id);
-void sliders_Measure(void);
-
-slider_data_t slider_data[SLIDERS_AMOUNT];
+#define SLIDERS_AMOUNT 5
+#define SLIDER_MAX_VAL 4095 // 12 bit conversion
 
 int channels[SLIDERS_AMOUNT];
+int values[SLIDERS_AMOUNT]; // From 0 to 100
+
+void sliders_Measure(void);
+void sliders_Tick(void *data, int period, int id);
 
 void sliders_Init(void)
 {
@@ -32,14 +34,9 @@ void sliders_Init(void)
 	rti_Register(sliders_Tick, NULL, RTI_MS_TO_TICKS(5), RTI_NOW);
 }
 
-void sliders_Set(slider_data_t data[])
+void sliders_Measure(void)
 {
-	for (int i = 0; i < SLIDERS_AMOUNT; ++i)
-	{
-		slider_data[i].value = data[i].value;
-		slider_data[i].min = data[i].min;
-		slider_data[i].max = data[i].max;
-	}
+	sadc_StartFIFOConversion(channels);
 }
 
 void sliders_Tick(void *data, int period, int id)
@@ -48,24 +45,43 @@ void sliders_Tick(void *data, int period, int id)
 	{
 		int results[SLIDERS_AMOUNT];
 		sadc_GetFIFOResults(results);
-		sliders_Measure();
 		
 		for (int i = 0; i < SLIDERS_AMOUNT; ++i)
 		{
-			slider_ProcessMeasurement(results[i], i);
-		}	
+			values[i] = (results[i] * 100) / SLIDER_MAX_VAL;
+		}
+		
+		sliders_Measure();
 	}	
 }
 
-void sliders_Measure(void)
+slider_pos sliders_GetPos(int param_idx)
 {
-	sadc_StartFIFOConversion(channels);
+	int val = values[param_idx];
+	
+	if (val <= 2) // From 0% to 2%
+	{
+		return BIG_DECREASE;
+	}
+	else if (val < 45) // From 2% to 45%
+	{
+		return SLIGHT_DECREASE;
+	}
+	else if (val <= 55) // From 45% to 55%
+	{
+		return KEEP;
+	}
+	else if (val < 98) // From 55% to 98%
+	{
+		return SLIGHT_INCREASE;
+	}
+	else // From 98% to 100%
+	{
+		return BIG_INCREASE;
+	}
 }
 
-void slider_ProcessMeasurement(int result, int index)
+int sliders_GetVolume(void)
 {
-	/*// We need to determine where result lies: either on the maintain, slight modify 
-	ADC_MAX_VALUE /2 */
-	
-	*(slider_data[index].value) = result;
+	return values[SLIDERS_AMOUNT - 1]; // The volume slider is the last slider
 }

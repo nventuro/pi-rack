@@ -9,13 +9,18 @@
 #define MAX_EFFECT_PARAMS 4
 #define PARAM_NAME_LENGTH 5
 
+#define PARAM_VALUE_LENGTH 4
+
 #define NO_PARAM_MSG "----"
 #define NO_PARAM_MSG_LENGHT 4 // 4 == strlen("----")
 
 #define VOLUME_MSG "Volume"
 #define VOLUME_MSG_LENGTH 6 // 6 == strlen("Volume")
 
-#define PARAM_VALUE_LENGTH 4
+#define MIN_VOLUME 70 // 0.7
+#define MAX_VOLUME 300 // 3.0
+
+#define VOLUME_BAR_LENGTH 9
 
 typedef struct
 {
@@ -39,6 +44,8 @@ extern effect_data_t effects[MAX_EFFECTS];
 
 extern int currEffect;
 extern int numLoadedEffects;
+
+extern int2d volume;
 
 void initializeEffects(void);
 
