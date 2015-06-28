@@ -33,7 +33,7 @@ You should also update the Pi's firmware. Instructions to do so can be found [he
 Finally, USB devices should be forced to run in 1.1 mode by running `sudo nano /boot/cmdline.txt` and adding `dwc_otg.speed=1` at the end. **This causes most keyboards to stop working on the RPi, so be sure to set up SSH or VNC remote access beforehand.**
 
 ### Pure Data
-Simply install via `sudo apt-get install puredata pd-zexy`. Pure Data must be started from the command line, using `pd -lib zexy` (plus whatever other options you might use, such as `-nogui`). `pd-zexy` is required for the `multiplex~` and `demultiplex~` objects.
+Simply install via `sudo apt-get install puredata pd-zexy pd-comport pd-cyclone`. Pure Data must be started from the command line, using `sudo pd -lib zexy -lib comport -lib cyclone/coll` (plus whatever other options you might use, such as `-nogui`). `pd-zexy` is required for the `multiplex~` and `demultiplex~` objects, `pd-comport` is required for the `comport` object, and `pd-cyclone` is required for the `coll` object, inside `convert.ascii2pd`.
 
 **Make sure the correct number of input channels is set on Pure Data (Media/Audio Settings).** The CM108 (as well as most cheap soundcards) only has one input channel, but the default value is 2. Failure to correct this setting will prevent Pure Data from properly reading the input signal from your USB interface.
 
